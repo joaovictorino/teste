@@ -21,4 +21,32 @@ describe("Transferência serviço", () => {
         expect(repositorio.buscar("654321")!.saldo).toBe(5100.0);
         expect(recibo.length).toBe(6);
     });
+
+    test("conta de origem não encontrada", () => {
+        const repositorio = new MemoriaContaRepositorio();
+        const contaOrigem = new Conta("123456", 5000.0);
+        const contaDestino = new Conta("654321", 5000.0);
+        repositorio.adicionar(contaOrigem);
+        repositorio.adicionar(contaDestino);
+
+        const transferenciaServico = new TransferenciaServico(repositorio);
+        
+        const dto = new TransferenciaDTO("111111", "654321", 100.0);
+
+        expect(() => { transferenciaServico.transferir(dto); }).toThrow("conta de origem não encontrada");
+    });
+
+    test("conta de destino não encontrada", () => {
+        const repositorio = new MemoriaContaRepositorio();
+        const contaOrigem = new Conta("123456", 5000.0);
+        const contaDestino = new Conta("654321", 5000.0);
+        repositorio.adicionar(contaOrigem);
+        repositorio.adicionar(contaDestino);
+
+        const transferenciaServico = new TransferenciaServico(repositorio);
+        
+        const dto = new TransferenciaDTO("123456", "222222", 100.0);
+
+        expect(() => { transferenciaServico.transferir(dto); }).toThrow("conta de destino não encontrada");
+    });
 });
