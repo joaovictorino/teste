@@ -1,11 +1,11 @@
 import { TransferenciaServico } from "../../src/application/TransferenciaServico";
 import { TransferenciaDTO } from "../../src/application/dto/TransferenciaDTO";
 import { Conta } from "../../src/model/Conta";
-import { MemoriaContaRepositorio } from "../fake/MemoriaContaRepositorio";
+import { Repositorio } from "../../src/model/contract/Repositorio";
 
-describe("Transferência serviço", () => {
-    test("transferir valores com sucesso", () => {
-        const repositorio = criarContaRepositorio();
+describe("Transferencia servico mock", () => {
+    test("transferencia com sucesso", () => {
+        const { repositorio, contaOrigem, contaDestino } = criarMock();
 
         const transferenciaServico = new TransferenciaServico(repositorio);
         
@@ -13,13 +13,20 @@ describe("Transferência serviço", () => {
 
         const recibo = transferenciaServico.transferir(dto);
 
+        expect(repositorio.buscar).toBeCalledTimes(2);
+        expect(repositorio.adicionar).toBeCalledTimes(2);
+        expect(repositorio.buscar).toBeCalledWith("123456");
+        expect(repositorio.buscar).toBeCalledWith("654321");
+        expect(repositorio.adicionar).toBeCalledWith(contaOrigem);
+        expect(repositorio.adicionar).toBeCalledWith(contaDestino);
+
         expect(repositorio.buscar("123456")!.saldo).toBe(4900.0);
         expect(repositorio.buscar("654321")!.saldo).toBe(5100.0);
         expect(recibo.length).toBe(6);
     });
 
     test("conta de origem não encontrada", () => {
-        const repositorio = criarContaRepositorio();
+        const { repositorio } = criarMock();
 
         const transferenciaServico = new TransferenciaServico(repositorio);
         
@@ -29,7 +36,7 @@ describe("Transferência serviço", () => {
     });
 
     test("conta de destino não encontrada", () => {
-        const repositorio = criarContaRepositorio();
+        const { repositorio } = criarMock();
 
         const transferenciaServico = new TransferenciaServico(repositorio);
         
@@ -39,12 +46,23 @@ describe("Transferência serviço", () => {
     });
 });
 
-function criarContaRepositorio(){
-    const repositorio = new MemoriaContaRepositorio();
+function criarMock() {
     const contaOrigem = new Conta("123456", 5000.0);
     const contaDestino = new Conta("654321", 5000.0);
-    repositorio.adicionar(contaOrigem);
-    repositorio.adicionar(contaDestino);
 
-    return repositorio;
+    const repositorio: jest.Mocked<Repositorio<Conta, string>> = {
+        adicionar: jest.fn((entidade: Conta) => {
+        }),
+        buscar: jest.fn((numero: string) => {
+            if(numero === "123456"){
+                return contaOrigem;
+            } else if (numero === "654321") {
+                return contaDestino;
+            } else {
+                return undefined;
+            }
+        })
+    };
+
+    return { repositorio, contaOrigem, contaDestino };
 }
