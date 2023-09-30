@@ -8,9 +8,7 @@ describe("Transferência serviço", () => {
         const repositorio = criarContaRepositorio();
 
         const transferenciaServico = new TransferenciaServico(repositorio);
-        
         const dto = new TransferenciaDTO("123456", "654321", 100.0);
-
         const recibo = transferenciaServico.transferir(dto);
 
         expect(repositorio.buscar("123456")!.saldo).toBe(4900.0);
