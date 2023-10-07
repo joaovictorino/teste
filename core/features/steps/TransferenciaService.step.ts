@@ -10,7 +10,7 @@ class TransferenciaServicoStep {
   private repositorio = new MemoriaContaRepositorio();
 
   @given("conta {string} com saldo {float} e a conta {string} com saldo {float}")
-  public dadaDuasContas(numeroOrigem: string, saldoOrigem: number, numeroDestino: string, saldoDestino: number): void {
+  public dadaDuasContas(numeroOrigem: string, saldoOrigem: number, numeroDestino: string, saldoDestino: number): void {    
     const contaOrigem = new Conta(numeroOrigem, saldoOrigem);
     const contaDestino = new Conta(numeroDestino, saldoDestino);
     this.repositorio.adicionar(contaOrigem);
@@ -25,9 +25,11 @@ class TransferenciaServicoStep {
   }
 
   @then("o saldo da conta {string} deve ser {float} e a conta {string} {float}")
-  public entaoSaldoDeveSer(numeroOrigem: string, resultadoOrigem: number, numeroDestino: string, resultadoDestino: number): void {
-    assert.equal(this.repositorio.buscar(numeroOrigem)!.saldo, resultadoOrigem);
-    assert.equal(this.repositorio.buscar(numeroDestino)!.saldo, resultadoDestino);
+  public async entaoSaldoDeveSer(numeroOrigem: string, resultadoOrigem: number, numeroDestino: string, resultadoDestino: number) {
+    const contaOrigem = await this.repositorio.buscar(numeroOrigem);
+    const contaDestino = await this.repositorio.buscar(numeroDestino);
+    assert.equal(contaOrigem!.saldo, resultadoOrigem);
+    assert.equal(contaDestino!.saldo, resultadoDestino);
   }
 }
 
